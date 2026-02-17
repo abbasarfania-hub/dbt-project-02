@@ -37,6 +37,23 @@ jobs:
       - name: Install dbt Postgres
         run: pip install dbt-postgres
 
+      # 👇 ساخت جدول خام قبل از اجرای dbt
+      - name: Create raw_customers table
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -d testdb <<EOF
+          CREATE TABLE raw_customers (
+              id INT,
+              first_name TEXT,
+              last_name TEXT
+          );
+
+          INSERT INTO raw_customers VALUES
+              (1, 'Ali', 'Ahmadi'),
+              (2, 'Sara', 'Mohammadi');
+          EOF
+
       - name: Create DBT profile
         run: |
           mkdir -p ~/.dbt
