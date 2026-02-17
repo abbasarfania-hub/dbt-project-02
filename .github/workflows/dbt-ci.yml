@@ -30,7 +30,8 @@ jobs:
       - name: Set up DBT profiles
         run: |
           mkdir -p ~/.dbt
-          echo 'my_project:
+          cat <<EOF > ~/.dbt/profiles.yml
+my_project:
   outputs:
     dev:
       type: postgres
@@ -41,7 +42,8 @@ jobs:
       pass: ${{ secrets.DB_PASS }}
       dbname: testdb
       schema: public
-  target: dev' > ~/.dbt/profiles.yml
+  target: dev
+EOF
 
       - name: Run dbt models
         run: dbt run --profiles-dir ~/.dbt
