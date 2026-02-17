@@ -10,6 +10,21 @@ jobs:
   dbt-run:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,9 +33,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
 
       - name: Install dbt Postgres
         run: pip install dbt-postgres
@@ -33,13 +45,12 @@ jobs:
           echo "    dev:" >> ~/.dbt/profiles.yml
           echo "      type: postgres" >> ~/.dbt/profiles.yml
           echo "      threads: 1" >> ~/.dbt/profiles.yml
-          echo "      host: ${{ secrets.DBT_HOST }}" >> ~/.dbt/profiles.yml
-          echo "      port: ${{ secrets.DBT_PORT }}" >> ~/.dbt/profiles.yml
-          echo "      user: ${{ secrets.DBT_USER }}" >> ~/.dbt/profiles.yml
-          echo "      pass: ${{ secrets.DBT_PASSWORD }}" >> ~/.dbt/profiles.yml
-          echo "      dbname: ${{ secrets.DBT_DBNAME }}" >> ~/.dbt/profiles.yml
-          echo "      schema: ${{ secrets.DBT_SCHEMA }}" >> ~/.dbt/profiles.yml
-          echo "      sslmode: require" >> ~/.dbt/profiles.yml
+          echo "      host: localhost" >> ~/.dbt/profiles.yml
+          echo "      port: 5432" >> ~/.dbt/profiles.yml
+          echo "      user: postgres" >> ~/.dbt/profiles.yml
+          echo "      pass: postgres" >> ~/.dbt/profiles.yml
+          echo "      dbname: testdb" >> ~/.dbt/profiles.yml
+          echo "      schema: public" >> ~/.dbt/profiles.yml
           echo "  target: dev" >> ~/.dbt/profiles.yml
 
       - name: Run dbt models
