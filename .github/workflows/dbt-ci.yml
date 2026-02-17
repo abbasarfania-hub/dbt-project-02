@@ -1,58 +1,57 @@
 name: dbt CI/CD
 
-# وقتی اجرا شود
 on:
   push:
     branches:
       - main
-      - dev   # وقتی Push روی این برنچ‌ها انجام شود
+  pull_request:
 
 jobs:
   dbt-run:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ گرفتن کد از GitHub
-      - name: Checkout repo
+      # 1️⃣ دریافت کدها
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ نصب پایتون
+      # 2️⃣ نصب Python و pip
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
-      # 3️⃣ نصب dbt مخصوص PostgreSQL
-      - name: Install dbt
-        run: |
-          pip install --upgrade pip
-          pip install dbt-postgres==1.10.0
+      - name: Upgrade pip
+        run: pip install --upgrade pip
 
-      # 4️⃣ کانفیگ پروفایل dbt
-      - name: Setup dbt profile
+      # 3️⃣ نصب dbt و adapter مربوط به PostgreSQL
+      - name: Install dbt Postgres
+        run: pip install "dbt-postgres>=1.11,<1.12"
+
+      # 4️⃣ ساخت پروفایل dbt با استفاده از GitHub Secrets
+      - name: Set up dbt profile
         run: |
           mkdir -p ~/.dbt
           echo "my_project:" > ~/.dbt/profiles.yml
+          echo "  target: dev" >> ~/.dbt/profiles.yml
           echo "  outputs:" >> ~/.dbt/profiles.yml
           echo "    dev:" >> ~/.dbt/profiles.yml
           echo "      type: postgres" >> ~/.dbt/profiles.yml
-          echo "      host: ${{ secrets.DB_HOST_DEV }}" >> ~/.dbt/profiles.yml
-          echo "      user: ${{ secrets.DB_USER_DEV }}" >> ~/.dbt/profiles.yml
-          echo "      pass: ${{ secrets.DB_PASS_DEV }}" >> ~/.dbt/profiles.yml
-          echo "      port: 5432" >> ~/.dbt/profiles.yml
-          echo "      dbname: ${{ secrets.DB_NAME_DEV }}" >> ~/.dbt/profiles.yml
-          echo "      schema: dev_schema" >> ~/.dbt/profiles.yml
+          echo "      host: ${{ secrets.DBT_HOST }}" >> ~/.dbt/profiles.yml
+          echo "      user: ${{ secrets.DBT_USER }}" >> ~/.dbt/profiles.yml
+          echo "      password: ${{ secrets.DBT_PASSWORD }}" >> ~/.dbt/profiles.yml
+          echo "      port: ${{ secrets.DBT_PORT }}" >> ~/.dbt/profiles.yml
+          echo "      dbname: ${{ secrets.DBT_DBNAME }}" >> ~/.dbt/profiles.yml
+          echo "      schema: ${{ secrets.DBT_SCHEMA }}" >> ~/.dbt/profiles.yml
           echo "      threads: 1" >> ~/.dbt/profiles.yml
-          echo "  target: dev" >> ~/.dbt/profiles.yml
 
-      # 5️⃣ نصب وابستگی‌های dbt
-      - name: Install dbt dependencies
-        run: dbt deps
-
-      # 6️⃣ اجرای مدل‌ها روی Dev
-      - name: Run dbt models
+      # 5️⃣ اجرای dbt run
+      - name: dbt run
         run: dbt run --target dev
 
-      # 7️⃣ اجرای تست‌ها روی Dev
-      - name: Run dbt tests
+      # 6️⃣ اجرای dbt test
+      - name: dbt test
         run: dbt test --target dev
+
+      # 7️⃣ اجرای dbt docs generate (اختیاری)
+      - name: dbt docs generate
+        run: dbt docs generate --target dev
