@@ -26,7 +26,7 @@ jobs:
       - name: Install dbt
         run: |
           pip install --upgrade pip
-          pip install dbt-postgres==1.11.4
+          pip install dbt-postgres==1.10.0
 
       # 4️⃣ کانفیگ پروفایل dbt
       - name: Setup dbt profile
