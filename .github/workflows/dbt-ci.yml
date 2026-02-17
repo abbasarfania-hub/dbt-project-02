@@ -11,15 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - run: python -m pip install --upgrade pip
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
 
-      - run: pip install dbt-postgres
+      - name: Install dbt Postgres
+        run: pip install dbt-postgres
 
       - name: Create DBT profile
         run: |
@@ -29,14 +33,17 @@ jobs:
           echo "    dev:" >> ~/.dbt/profiles.yml
           echo "      type: postgres" >> ~/.dbt/profiles.yml
           echo "      threads: 1" >> ~/.dbt/profiles.yml
-          echo "      host: localhost" >> ~/.dbt/profiles.yml
-          echo "      port: 5432" >> ~/.dbt/profiles.yml
-          echo "      user: ${{ secrets.DB_USER }}" >> ~/.dbt/profiles.yml
-          echo "      pass: ${{ secrets.DB_PASS }}" >> ~/.dbt/profiles.yml
-          echo "      dbname: testdb" >> ~/.dbt/profiles.yml
-          echo "      schema: public" >> ~/.dbt/profiles.yml
+          echo "      host: ${{ secrets.DBT_HOST }}" >> ~/.dbt/profiles.yml
+          echo "      port: ${{ secrets.DBT_PORT }}" >> ~/.dbt/profiles.yml
+          echo "      user: ${{ secrets.DBT_USER }}" >> ~/.dbt/profiles.yml
+          echo "      pass: ${{ secrets.DBT_PASSWORD }}" >> ~/.dbt/profiles.yml
+          echo "      dbname: ${{ secrets.DBT_DBNAME }}" >> ~/.dbt/profiles.yml
+          echo "      schema: ${{ secrets.DBT_SCHEMA }}" >> ~/.dbt/profiles.yml
+          echo "      sslmode: require" >> ~/.dbt/profiles.yml
           echo "  target: dev" >> ~/.dbt/profiles.yml
 
-      - run: dbt run --profiles-dir ~/.dbt
+      - name: Run dbt models
+        run: dbt run --profiles-dir ~/.dbt
 
-      - run: dbt test --profiles-dir ~/.dbt
+      - name: Run dbt tests
+        run: dbt test --profiles-dir ~/.dbt
