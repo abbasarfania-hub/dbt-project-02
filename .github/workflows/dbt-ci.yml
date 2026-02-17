@@ -37,7 +37,6 @@ jobs:
       - name: Install dbt Postgres
         run: pip install dbt-postgres
 
-      # 👇 ساخت جدول خام قبل از اجرای dbt
       - name: Create raw_customers table
         run: |
           psql postgresql://postgres:postgres@localhost:5432/testdb -c "DROP TABLE IF EXISTS raw_customers;"
@@ -47,13 +46,14 @@ jobs:
               first_name TEXT,
               last_name TEXT,
               email TEXT,
-              signup_date DATE
+              signup_date DATE,
+              region TEXT
             );
           "
           psql postgresql://postgres:postgres@localhost:5432/testdb -c "
             INSERT INTO raw_customers VALUES
-              (1,'Ali','Ahmadi','ali@test.com','2026-01-01'),
-              (2,'Sara','Mohammadi','sara@test.com','2026-02-01');
+              (1,'Ali','Ahmadi','ali@test.com','2026-01-01','Tehran'),
+              (2,'Sara','Mohammadi','sara@test.com','2026-02-01','Shiraz');
           "
 
       - name: Create DBT profile
