@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Staging table for raw_customers"
+    columns:
+      - name: id
+        description: "Customer ID"
+        tests:
+          - not_null
+          - unique
+      - name: email
+        description: "Customer email"
+        tests:
+          - not_null

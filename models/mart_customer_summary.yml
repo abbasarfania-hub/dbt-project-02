@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_customer_summary
+    description: "Customer summary by region"
+    columns:
+      - name: region
+        description: "Region name"
+        tests:
+          - not_null

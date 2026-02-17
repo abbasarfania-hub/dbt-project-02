@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: int_customers
+    description: "Enhanced customer data with tiers"
+    columns:
+      - name: customer_tier
+        description: "VIP or Regular tier"
+        tests:
+          - not_null
